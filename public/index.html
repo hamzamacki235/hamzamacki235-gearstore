@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gear Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+      background: linear-gradient(135deg, #3498db, #2c3e50);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.5s ease;
+    }
+    
+    body.dark-mode {
+      background: linear-gradient(135deg, #1e1e1e, #121212);
+    }
+    
+    .top-controls {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    
+    .top-controls.hidden {
+      transform: translateY(-100px);
+    }
+    
+    .top-controls button {
+      background: rgba(0,0,0,0.2);
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .top-controls button:hover {
+      background: rgba(0,0,0,0.3);
+      transform: scale(1.1);
+    }
+    
+    #welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 30px 20px;
+      transition: opacity 0.5s ease;
+    }
+    
+    .welcome-content {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    #welcome-screen h1 {
+      font-size: 2.8rem;
+      margin-bottom: 25px;
+      line-height: 1.3;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    #welcome-screen p {
+      font-size: 1.4rem;
+      margin-bottom: 50px;
+      opacity: 0.9;
+      line-height: 1.6;
+      padding: 0 15px;
+    }
+    
+    .auth-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    
+    .auth-buttons button {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .auth-buttons button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+    
+    .auth-buttons img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+    
+    .google { background-color: #db4437; }
+    .facebook { background-color: #3b5998; }
+    .email { background-color: #555; }
+    .guest { background-color: #607D8B; }
+    
+    .login-form {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      z-index: 1000;
+      width: 90%;
+      max-width: 400px;
+      color: #333;
+    }
+    
+    .login-form h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #2c3e50;
+    }
+    
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    
+    .login-form input:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    
+    .login-form button:hover {
+      background-color: #2980b9;
+    }
+    
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+    }
+    
+    #app-container {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    
+    .header {
+      background: linear-gradient(to right, #2980b9, #6dd5fa);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .topnav {
+      background: #2c3e50;
+      display: flex;
+      justify-content: center;
+      padding: 12px 10px;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .topnav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+    
+    .topnav a:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    
+    .settings-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .settings-btn {
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .settings-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    
+    .settings-content {
+      display: none;
+      position: absolute;
+      background-color: #2c3e50;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      left: 0;
+    }
+    
+    .settings-content a {
+      color: white;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .settings-content a:hover {
+      background-color: rgba(255,255,255,0.15);
+    }
+    
+    .settings-dropdown:hover .settings-content {
+      display: block;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 25px 20px;
+      overflow-y: auto;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    body.dark-mode .main-content {
+      background: #121212;
+      color: #f1f1f1;
+    }
+    
+    .dashboard-header {
+      margin-bottom: 25px;
+    }
+    
+    .dashboard-header h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: inherit;
+    }
+    
+    #welcome-message {
+      display: block;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    body.dark-mode .stat-card {
+      background: #1e1e1e;
+      border-color: #333;
+    }
+    
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #2980b9;
+      margin: 15px 0;
+    }
+    
+    body.dark-mode .stat-value {
+      color: #6dd5fa;
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      color: #666;
+    }
+    
+    body.dark-mode .stat-label {
+      color: #aaa;
+    }
+    
+    .dashboard-sections {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 25px;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-sections {
+        grid-template-columns: 1fr;
+      }
+      
+      .settings-content {
+        right: 0;
+        left: auto;
+      }
+    }
+    
+    .dashboard-section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+    }
+    
+    body.dark-mode .dashboard-section {
+      background: #1e1e1e;
+      border-color: #333;
+    }
+    
+    .dashboard-section h3 {
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      color: #2c3e50;
+    }
+    
+    body.dark-mode .dashboard-section h3 {
+      color: #f1f1f1;
+    }
+    
+    .quick-action-btn {
+      display: block;
+      padding: 12px;
+      background: #f1f1f1;
+      color: #333;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .quick-action-btn:hover {
+      background: #e1e1e1;
+      transform: translateX(5px);
+    }
+    
+    body.dark-mode .quick-action-btn {
+      background: #2c3e50;
+      color: white;
+    }
+    
+    body.dark-mode .quick-action-btn:hover {
+      background: #34495e;
+    }
+    
+    .settings-page {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+    }
+    
+    body.dark-mode .settings-page {
+      background: #1e1e1e;
+      border-color: #333;
+    }
+    
+    .settings-page h2 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    
+    body.dark-mode .settings-page h2 {
+      color: #f1f1f1;
+    }
+    
+    .settings-page p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+    
+    .settings-page ul {
+      margin-bottom: 20px;
+      padding-right: 20px;
+    }
+    
+    .settings-page li {
+      margin-bottom: 10px;
+    }
+    
+    #products h2,
+    #orders h2,
+    #cart h2,
+    #add-product h2,
+    #help h2,
+    #faq h2,
+    #about h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: inherit;
+    }
+    
+    #product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .product {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      border: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+    
+    body.dark-mode .product {
+      background: #1e1e1e;
+      border-color: #333;
+    }
+    
+    .product img {
+      width: 100%;
+      border-radius: 8px;
+      height: 180px;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+    
+    .product h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    
+    body.dark-mode .product h3 {
+      color: #f1f1f1;
+    }
+    
+    .product p {
+      color: #666;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+    
+    body.dark-mode .product p {
+      color: #aaa;
+    }
+    
+    .product button {
+      background: #2980b9;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: auto;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    
+    .product button:hover {
+      background: #3498db;
+    }
+    
+    .list-item {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+    }
+    
+    .list-item:hover {
+      background: rgba(0,0,0,0.03);
+    }
+    
+    body.dark-mode .list-item {
+      border-color: #333;
+    }
+    
+    body.dark-mode .list-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .list-item div {
+      flex: 1;
+    }
+    
+    .list-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .list-item p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    body.dark-mode .list-item p {
+      color: #aaa;
+    }
+    
+    .list-item span {
+      color: #666;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      margin-left: 15px;
+    }
+    
+    body.dark-mode .list-item span {
+      color: #aaa;
+    }
+    
+    .list-item button {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-left: 10px;
+      transition: transform 0.3s;
+    }
+    
+    .list-item button:hover {
+      transform: scale(1.2);
+    }
+    
+    #add-product-form input,
+    #add-product-form textarea,
+    #add-product-form button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    
+    #add-product-form input:focus,
+    #add-product-form textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    
+    #add-product-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    #add-product-form button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    #add-product-form button:hover {
+      background-color: #3498db;
+    }
+    
+    body.dark-mode #add-product-form input,
+    body.dark-mode #add-product-form textarea {
+      background: #2c3e50;
+      color: white;
+      border-color: #34495e;
+    }
+    
+    #checkout-btn {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 30px auto 0;
+      padding: 15px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    #checkout-btn:hover {
+      background: #2ecc71;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .page {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      #welcome-screen h1 {
+        font-size: 2.2rem;
+      }
+      
+      #welcome-screen p {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+      }
+      
+      .auth-buttons button {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .auth-buttons img {
+        height: 28px;
+        width: 28px;
+      }
+      
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .topnav a {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      #product-list {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      #welcome-screen h1 {
+        font-size: 1.8rem;
+      }
+      
+      .auth-buttons {
+        gap: 15px;
+      }
+      
+      .auth-buttons button {
+        width: 55px;
+        height: 55px;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .topnav {
+        gap: 8px;
+      }
+      
+      .topnav a {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+</head>
+
+<body>
+  <div class="top-controls">
+    <button onclick="toggleDarkMode()" id="darkModeBtn">🌙</button>
+    <button onclick="toggleLanguage()" id="langBtn">🇸🇦</button>
+  </div>
+  
+  <div id="welcome-screen">
+    <div class="welcome-content">
+      <h1 data-translate="welcome_title">أهلاً بك في Gear Store</h1>
+      <p data-translate="welcome_subtitle">أفضل وجهتك للتسوق الإلكتروني</p>
+      
+      <div class="auth-buttons">
+        <button class="google" onclick="signInWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="جوجل">
+        </button>
+        <button class="facebook" onclick="signInWithFacebook()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" alt="فيسبوك">
+        </button>
+        <button class="email" onclick="showEmailLogin()">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/new-post.png" alt="بريد إلكتروني">
+        </button>
+        <button class="guest" onclick="continueAsGuest()">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/guest-male.png" alt="ضيف">
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="overlay" id="overlay"></div>
+  <div class="login-form" id="loginForm">
+    <h2 data-translate="login_title">تسجيل الدخول</h2>
+    <input type="email" id="email" placeholder="البريد الإلكتروني" data-translate="email_placeholder">
+    <input type="password" id="password" placeholder="كلمة المرور" data-translate="password_placeholder">
+    <button onclick="signInWithEmail()" data-translate="login_button">تسجيل الدخول</button>
+    <button onclick="hideEmailLogin()" style="background-color: #888; margin-top: 10px;" data-translate="cancel_button">إلغاء</button>
+  </div>
+  
+  <div id="app-container">
+    <div class="header">
+      <h1 id="app-title" data-translate="welcome_title">أهلاً بك في Gear Store</h1>
+    </div>
+    
+    <div class="topnav">
+      <a href="#" onclick="showPage('dashboard')">
+        <span>📊</span>
+        <span data-translate="nav_dashboard">لوحة التحكم</span>
+      </a>
+      <a href="#" onclick="showPage('products')">
+        <span>🛒</span>
+        <span data-translate="nav_products">المنتجات</span>
+      </a>
+      <a href="#" onclick="showPage('orders')">
+        <span>📦</span>
+        <span data-translate="nav_orders">الطلبات</span>
+      </a>
+      <a href="#" onclick="showPage('cart')">
+        <span>🛍️</span>
+        <span data-translate="nav_cart">العربة</span>
+        <span id="cart-badge" style="display: none;"></span>
+      </a>
+      <a href="#" onclick="showPage('add-product')">
+        <span>➕</span>
+        <span data-translate="nav_add_product">إضافة منتج</span>
+      </a>
+      <div class="settings-dropdown">
+        <button class="settings-btn">
+          <span>⚙️</span>
+          <span data-translate="nav_settings">الإعدادات</span>
+        </button>
+        <div class="settings-content">
+          <a href="#" onclick="showPage('help')"><span>❓</span> <span data-translate="settings_help">المساعدة</span></a>
+          <a href="#" onclick="showPage('faq')"><span>❔</span> <span data-translate="settings_faq">الأسئلة الشائعة</span></a>
+          <a href="#" onclick="showPage('about')"><span>ℹ️</span> <span data-translate="settings_about">عن التطبيق</span></a>
+          <a href="#" id="logoutLink"><span>🚪</span> <span data-translate="nav_logout">تسجيل خروج</span></a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <div id="dashboard" class="page active">
+        <div class="dashboard-header">
+          <h2 data-translate="dashboard_title">لوحة التحكم</h2>
+          <span id="welcome-message">مرحباً بك، مستخدم</span>
+        </div>
+        
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="total-orders">0</div>
+            <div class="stat-label" data-translate="total_orders">إجمالي الطلبات</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="pending-orders">0</div>
+            <div class="stat-label" data-translate="pending_orders">طلبات قيد المعالجة</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cart-items">0</div>
+            <div class="stat-label" data-translate="cart_items">عناصر في العربة</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-spent">0 FCFA</div>
+            <div class="stat-label" data-translate="total_spent">إجمالي المشتريات</div>
+          </div>
+        </div>
+        
+        <div class="dashboard-sections">
+          <div class="dashboard-section">
+            <h3 data-translate="quick_actions">إجراءات سريعة</h3>
+            <div style="display: grid; gap: 12px;">
+              <a href="#" onclick="showPage('add-product')" class="quick-action-btn">
+                <span>➕</span>
+                <span data-translate="action_add_product">إضافة منتج جديد</span>
+              </a>
+              <a href="#" onclick="showPage('orders')" class="quick-action-btn">
+                <span>📦</span>
+                <span data-translate="action_view_orders">عرض الطلبات</span>
+              </a>
+              <a href="#" onclick="showPage('products')" class="quick-action-btn">
+                <span>🛒</span>
+                <span data-translate="action_browse_products">تصفح المنتجات</span>
+              </a>
+              <a href="#" onclick="showPage('cart')" class="quick-action-btn">
+                <span>🛍️</span>
+                <span data-translate="action_view_cart">عرض العربة</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="dashboard-section">
+            <h3 data-translate="recent_orders">آخر الطلبات</h3>
+            <div id="recent-orders">
+              <p data-translate="loading_orders">جاري تحميل الطلبات...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="products" class="page">
+        <h2 data-translate="all_products">جميع المنتجات</h2>
+        <div id="product-list">
+          <p data-translate="loading_products">جاري تحميل المنتجات...</p>
+        </div>
+      </div>
+      
+      <div id="orders" class="page">
+        <h2 data-translate="manage_orders">إدارة الطلبات</h2>
+        <div id="orders-list">
+          <p data-translate="loading_orders">جاري تحميل الطلبات...</p>
+        </div>
+      </div>
+      
+      <div id="cart" class="page">
+        <h2 data-translate="shopping_cart">عربة التسوق</h2>
+        <div id="cart-items">
+          <p data-translate="empty_cart">العربة فارغة</p>
+        </div>
+        <button id="checkout-btn" data-translate="checkout_button">إتمام الشراء</button>
+      </div>
+      
+      <div id="add-product" class="page">
+        <h2 data-translate="add_product_title">إضافة منتج جديد</h2>
+        <form id="add-product-form">
+          <input type="text" id="product-name" placeholder="اسم المنتج" data-translate="product_name_placeholder" required>
+          <input type="number" id="product-price" placeholder="السعر" data-translate="product_price_placeholder" required>
+          <textarea id="product-desc" placeholder="الوصف" data-translate="product_desc_placeholder"></textarea>
+          <input type="file" id="product-image" accept="image/*" required>
+          <button type="submit" data-translate="add_product_button">إضافة المنتج</button>
+        </form>
+      </div>
+      
+      <div id="help" class="page settings-page">
+        <h2 data-translate="settings_help">المساعدة</h2>
+        <p>إذا كنت بحاجة إلى مساعدة، يمكنك التواصل مع فريق الدعم عبر:</p>
+        <ul>
+          <li>الأرقام: +23599987837 - +23566687837</li>
+          <li>البريد الإلكتروني: walmacki235@gmail.com</li>
+          <li>ساعات العمل: من الأحد إلى الخميس، 9 صباحاً - 5 مساءً</li>
+        </ul>
+        <p data-translate="currency_info">عملة الشراء: فرنك وسط أفريقي (XAF) - رمز العملة: FCFA</p>
+      </div>
+      
+      <div id="faq" class="page settings-page">
+        <h2 data-translate="settings_faq">الأسئلة الشائعة</h2>
+        <h3>كيف أضيف منتجاً جديداً؟</h3>
+        <p>يمكنك إضافة منتج جديد من خلال الذهاب إلى صفحة "إضافة منتج" وملء النموذج بالمعلومات المطلوبة.</p>
+        
+        <h3>كيف أتتبع طلبي؟</h3>
+        <p>يمكنك تتبع حالة طلبك من خلال صفحة "الطلبات" حيث ستجد جميع طلباتك مع حالة كل منها.</p>
+        
+        <h3>ما هي طرق الدفع المتاحة؟</h3>
+        <p>نحن نقبل الدفع بواسطة بطاقات الائتمان والدفع عند الاستلام.</p>
+      </div>
+      
+      <div id="about" class="page settings-page">
+        <h2 data-translate="settings_about">عن التطبيق</h2>
+        <p>Gear Store هو تطبيق متجر إلكتروني متكامل يوفر لك تجربة تسوق سهلة وسريعة.</p>
+        <p>الإصدار: 1.0.0</p>
+        <p>تاريخ الإصدار: ١ يناير ٢٠٢٣</p>
+        <p>© 2023 جميع الحقوق محفوظة</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB7IuZDg99I0NJcTzOicvjtz4Lxg448ms",
+      authDomain: "gearstore-51108.firebaseapp.com",
+      databaseURL: "https://gearstore-51108-default-rtdb.firebaseio.com",
+      projectId: "gearstore-51108",
+      storageBucket: "gearstore-51108.appspot.com",
+      messagingSenderId: "397057376368",
+      appId: "1:397057376368:web:646d75263ed930a3f2b4b5",
+      measurementId: "G-Q16MW55P0W"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const storage = firebase.storage();
+
+    let currentUser = null;
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let currentPage = 'dashboard';
+    let lastScrollPosition = 0;
+
+    const translations = {
+      en: {
+        welcome_title: "Welcome to Gear Store",
+        welcome_subtitle: "Your ultimate e-commerce destination",
+        login_title: "Login",
+        email_placeholder: "Email",
+        password_placeholder: "Password",
+        login_button: "Login",
+        cancel_button: "Cancel",
+        dashboard_title: "Dashboard",
+        nav_dashboard: "Dashboard",
+        nav_products: "Products",
+        nav_orders: "Orders",
+        nav_cart: "Cart",
+        nav_add_product: "Add Product",
+        nav_settings: "Settings",
+        nav_logout: "Logout",
+        total_orders: "Total Orders",
+        pending_orders: "Pending Orders",
+        cart_items: "Items in Cart",
+        total_spent: "Total Spent",
+        quick_actions: "Quick Actions",
+        action_add_product: "Add New Product",
+        action_view_orders: "View Orders",
+        action_browse_products: "Browse Products",
+        action_view_cart: "View Cart",
+        recent_orders: "Recent Orders",
+        loading_orders: "Loading orders...",
+        all_products: "All Products",
+        loading_products: "Loading products...",
+        manage_orders: "Manage Orders",
+        shopping_cart: "Shopping Cart",
+        empty_cart: "Cart is empty",
+        checkout_button: "Checkout",
+        add_product_title: "Add New Product",
+        product_name_placeholder: "Product Name",
+        product_price_placeholder: "Price",
+        product_desc_placeholder: "Description",
+        add_product_button: "Add Product",
+        settings_help: "Help",
+        settings_faq: "FAQ",
+        settings_about: "About",
+        logout_confirm: "Are you sure you want to logout?",
+        currency_info: "Payment currency: Central African Franc (XAF) - Currency symbol: FCFA"
+      },
+      ar: {
+        welcome_title: "أهلاً بك في Gear Store",
+        welcome_subtitle: "أفضل وجهتك للتسوق الإلكتروني",
+        login_title: "تسجيل الدخول",
+        email_placeholder: "البريد الإلكتروني",
+        password_placeholder: "كلمة المرور",
+        login_button: "تسجيل الدخول",
+        cancel_button: "إلغاء",
+        dashboard_title: "لوحة التحكم",
+        nav_dashboard: "لوحة التحكم",
+        nav_products: "المنتجات",
+        nav_orders: "الطلبات",
+        nav_cart: "العربة",
+        nav_add_product: "إضافة منتج",
+        nav_settings: "الإعدادات",
+        nav_logout: "تسجيل خروج",
+        total_orders: "إجمالي الطلبات",
+        pending_orders: "طلبات قيد المعالجة",
+        cart_items: "عناصر في العربة",
+        total_spent: "إجمالي المشتريات",
+        quick_actions: "إجراءات سريعة",
+        action_add_product: "إضافة منتج جديد",
+        action_view_orders: "عرض الطلبات",
+        action_browse_products: "تصفح المنتجات",
+        action_view_cart: "عرض العربة",
+        recent_orders: "آخر الطلبات",
+        loading_orders: "جاري تحميل الطلبات...",
+        all_products: "جميع المنتجات",
+        loading_products: "جاري تحميل المنتجات...",
+        manage_orders: "إدارة الطلبات",
+        shopping_cart: "عربة التسوق",
+        empty_cart: "العربة فارغة",
+        checkout_button: "إتمام الشراء",
+        add_product_title: "إضافة منتج جديد",
+        product_name_placeholder: "اسم المنتج",
+        product_price_placeholder: "السعر",
+        product_desc_placeholder: "الوصف",
+        add_product_button: "إضافة المنتج",
+        settings_help: "المساعدة",
+        settings_faq: "الأسئلة الشائعة",
+        settings_about: "عن التطبيق",
+        logout_confirm: "هل أنت متأكد من تسجيل الخروج؟",
+        currency_info: "عملة الشراء: فرنك وسط أفريقي (XAF) - رمز العملة: FCFA"
+      }
+    };
+
+    function translatePage(lang) {
+      const elements = document.querySelectorAll('[data-translate]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = translations[lang][key];
+          } else {
+            el.textContent = translations[lang][key];
+          }
+        }
+      });
+      
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+    }
+
+    function toggleLanguage() {
+      const currentLang = localStorage.getItem('language') || 'ar';
+      const newLang = currentLang === 'ar' ? 'en' : 'ar';
+      
+      localStorage.setItem('language', newLang);
+      document.getElementById('langBtn').textContent = newLang === 'ar' ? '🇸🇦' : '🇬🇧';
+      translatePage(newLang);
+    }
+
+    function handleScroll() {
+      const currentScrollPosition = window.pageYOffset;
+      const topControls = document.querySelector('.top-controls');
+      
+      if (currentScrollPosition > lastScrollPosition && currentScrollPosition > 100) {
+        topControls.classList.add('hidden');
+      }
+      
+      lastScrollPosition = currentScrollPosition;
+    }
+
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          showMainApp(result.user);
+        })
+        .catch((error) => {
+          alert('حدث خطأ: ' + error.message);
+        });
+    }
+
+    function signInWithFacebook() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          showMainApp(result.user);
+        })
+        .catch((error) => {
+          alert('حدث خطأ: ' + error.message);
+        });
+    }
+
+    function signInWithEmail() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          showMainApp(userCredential.user);
+        })
+        .catch((error) => {
+          alert('حدث خطأ: ' + error.message);
+        });
+    }
+
+    function continueAsGuest() {
+      auth.signInAnonymously()
+        .then((userCredential) => {
+          showMainApp(userCredential.user);
+        })
+        .catch((error) => {
+          alert('حدث خطأ: ' + error.message);
+        });
+    }
+
+    function logoutUser() {
+      if(confirm(document.querySelector('[data-translate="logout_confirm"]').textContent)) {
+        auth.signOut().then(() => {
+          document.getElementById('welcome-screen').style.display = 'flex';
+          document.getElementById('app-container').style.display = 'none';
+          cart = [];
+          localStorage.setItem('cart', JSON.stringify(cart));
+          updateCartBadge();
+        });
+      }
+    }
+
+    function showEmailLogin() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('loginForm').style.display = 'block';
+    }
+
+    function hideEmailLogin() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'none';
+    }
+
+    function showMainApp(user) {
+      currentUser = user;
+      document.getElementById('welcome-screen').style.display = 'none';
+      document.getElementById('app-container').style.display = 'flex';
+      document.getElementById('welcome-message').textContent = `مرحباً بك، ${user.displayName || user.email || 'ضيف'}`;
+      
+      loadDashboardData();
+      loadProducts();
+      loadOrders();
+      updateCartBadge();
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      const darkModeBtn = document.getElementById('darkModeBtn');
+      body.classList.toggle("dark-mode");
+      localStorage.setItem('darkMode', body.classList.contains("dark-mode"));
+      darkModeBtn.textContent = body.classList.contains("dark-mode") ? "☀️" : "🌙";
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      document.getElementById(pageId).classList.add('active');
+      currentPage = pageId;
+      
+      const titles = {
+        'dashboard': document.querySelector('[data-translate="welcome_title"]').textContent,
+        'products': document.querySelector('[data-translate="all_products"]').textContent,
+        'orders': document.querySelector('[data-translate="manage_orders"]').textContent,
+        'cart': document.querySelector('[data-translate="shopping_cart"]').textContent,
+        'add-product': document.querySelector('[data-translate="add_product_title"]').textContent,
+        'help': document.querySelector('[data-translate="settings_help"]').textContent,
+        'faq': document.querySelector('[data-translate="settings_faq"]').textContent,
+        'about': document.querySelector('[data-translate="settings_about"]').textContent
+      };
+      
+      document.getElementById('app-title').textContent = 
+        pageId === 'dashboard' ? 
+        document.querySelector('[data-translate="welcome_title"]').textContent : 
+        titles[pageId] + ' - Gear Store';
+      
+      if (pageId === 'products' && document.getElementById('product-list').children.length === 1) {
+        loadProducts();
+      } else if (pageId === 'orders') {
+        loadOrders();
+      } else if (pageId === 'cart') {
+        displayCartItems();
+      }
+    }
+
+    function loadDashboardData() {
+      db.ref('orders').once('value').then(snapshot => {
+        const orders = snapshot.val() || {};
+        document.getElementById('total-orders').textContent = Object.keys(orders).length;
+        document.getElementById('pending-orders').textContent = Object.values(orders).filter(o => o.status === 'pending').length;
+        
+        const recentOrders = Object.entries(orders).slice(-5).reverse();
+        const ordersContainer = document.getElementById('recent-orders');
+        ordersContainer.innerHTML = '';
+        
+        recentOrders.forEach(([id, order]) => {
+          const orderElement = document.createElement('div');
+          orderElement.className = 'list-item';
+          orderElement.innerHTML = `
+            <div>
+              <strong>${order.product || 'طلب بدون اسم'}</strong>
+              <p>الحالة: ${order.status || 'قيد المعالجة'}</p>
+            </div>
+            <span>${new Date(order.timestamp).toLocaleDateString()}</span>
+          `;
+          ordersContainer.appendChild(orderElement);
+        });
+      });
+    }
+
+    function loadProducts() {
+      db.ref('products').once('value').then(snapshot => {
+        const products = snapshot.val() || {};
+        const container = document.getElementById('product-list');
+        container.innerHTML = '';
+        
+        Object.entries(products).forEach(([id, product]) => {
+          const productElement = document.createElement('div');
+          productElement.className = 'product';
+          productElement.innerHTML = `
+            <img src="${product.image || 'https://via.placeholder.com/250'}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p>${product.price} FCFA</p>
+            <button onclick="addToCart('${id}', '${product.name}', ${product.price})">أضف إلى العربة</button>
+          `;
+          container.appendChild(productElement);
+        });
+      });
+    }
+
+    function loadOrders() {
+      db.ref('orders').once('value').then(snapshot => {
+        const orders = snapshot.val() || {};
+        const container = document.getElementById('orders-list');
+        container.innerHTML = '';
+        
+        Object.entries(orders).forEach(([id, order]) => {
+          const orderElement = document.createElement('div');
+          orderElement.className = 'list-item';
+          orderElement.innerHTML = `
+            <div>
+              <strong>${order.product}</strong>
+              <p>الكمية: ${order.quantity} | الحالة: ${order.status || 'قيد المعالجة'}</p>
+            </div>
+            <span>${new Date(order.timestamp).toLocaleDateString()}</span>
+          `;
+          container.appendChild(orderElement);
+        });
+      });
+    }
+
+    function addToCart(productId, productName, productPrice) {
+      cart.push({ id: productId, name: productName, price: productPrice });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+      alert(`تمت إضافة ${productName} إلى العربة`);
+    }
+
+    function displayCartItems() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+      
+      if (cart.length === 0) {
+        container.innerHTML = '<p>العربة فارغة</p>';
+        return;
+      }
+      
+      cart.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'list-item';
+        itemElement.innerHTML = `
+          <div>
+            <strong>${item.name}</strong>
+            <p>${item.price} FCFA</p>
+          </div>
+          <button onclick="removeFromCart(${index})">🗑️</button>
+        `;
+        container.appendChild(itemElement);
+      });
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      displayCartItems();
+      updateCartBadge();
+    }
+
+    function updateCartBadge() {
+      const cartItems = cart.length;
+      document.getElementById('cart-items').textContent = cartItems;
+      
+      const cartBadge = document.getElementById('cart-badge');
+      if (cartItems > 0) {
+        cartBadge.textContent = cartItems;
+        cartBadge.style.display = 'inline-block';
+        cartBadge.style.backgroundColor = '#e74c3c';
+        cartBadge.style.color = 'white';
+        cartBadge.style.borderRadius = '50%';
+        cartBadge.style.width = '20px';
+        cartBadge.style.height = '20px';
+        cartBadge.style.fontSize = '12px';
+        cartBadge.style.display = 'flex';
+        cartBadge.style.alignItems = 'center';
+        cartBadge.style.justifyContent = 'center';
+        cartBadge.style.marginRight = '5px';
+      } else {
+        cartBadge.style.display = 'none';
+      }
+      
+      const totalSpent = cart.reduce((total, item) => total + (parseFloat(item.price) || 0), 0);
+      document.getElementById('total-spent').textContent = `${totalSpent.toFixed(2)} FCFA`;
+    }
+
+    document.getElementById('add-product-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('product-name').value;
+      const price = document.getElementById('product-price').value;
+      const desc = document.getElementById('product-desc').value;
+      const image = document.getElementById('product-image').files[0];
+      
+      if (!name || !price || !image) {
+        alert('الرجاء ملء جميع الحقول المطلوبة');
+        return;
+      }
+      
+      const storageRef = storage.ref('products/' + Date.now() + '_' + image.name);
+      storageRef.put(image).then(() => {
+        return storageRef.getDownloadURL();
+      }).then(imageUrl => {
+        return db.ref('products').push({
+          name,
+          price,
+          desc,
+          image: imageUrl,
+          timestamp: Date.now()
+        });
+      }).then(() => {
+        alert('تمت إضافة المنتج بنجاح');
+        document.getElementById('add-product-form').reset();
+        loadProducts();
+        showPage('products');
+      }).catch(error => {
+        alert('حدث خطأ: ' + error.message);
+      });
+    });
+
+    document.getElementById('checkout-btn').addEventListener('click', () => {
+      if (cart.length === 0) {
+        alert('العربة فارغة');
+        return;
+      }
+      
+      if (!currentUser) {
+        alert('الرجاء تسجيل الدخول لإتمام الشراء');
+        return;
+      }
+      
+      const order = {
+        products: cart,
+        user: currentUser.displayName || currentUser.email || 'ضيف',
+        timestamp: Date.now(),
+        status: 'pending'
+      };
+      
+      db.ref('orders').push(order)
+        .then(() => {
+          alert('تمت عملية الشراء بنجاح');
+          cart = [];
+          localStorage.setItem('cart', JSON.stringify(cart));
+          displayCartItems();
+          updateCartBadge();
+          loadDashboardData();
+          showPage('dashboard');
+        })
+        .catch(error => {
+          alert('حدث خطأ أثناء إتمام الشراء: ' + error.message);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeBtn').textContent = '☀️';
+      }
+      
+      const lang = localStorage.getItem('language') || 'ar';
+      document.getElementById('langBtn').textContent = lang === 'ar' ? '🇸🇦' : '🇬🇧';
+      translatePage(lang);
+      
+      document.getElementById('logoutLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        logoutUser();
+      });
+      
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          showMainApp(user);
+        }
+      });
+      
+      window.addEventListener('scroll', handleScroll);
+    });
+  </script>
+</body>
+</html>
